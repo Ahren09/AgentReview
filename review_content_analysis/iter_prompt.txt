@@ -1,0 +1,11 @@
+Task: 
+Determine if the following review contains a reason that has not appeared in the reason library. If it does, output the abbreviation and detailed explanation of that reason. If not, output "No"
+
+Review：
+{review}
+
+Reason libary:
+{reason_library}
+
+Output Format:
+<"No" or "Reason Type: Explanation">
