@@ -3,16 +3,10 @@ from typing import List
 
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
-from arguments import parse_args
-from utility.authentication_utils import get_openai_client
+from agentreview.arguments import parse_args
+from agentreview.utility.authentication_utils import get_openai_client
 from .base import IntelligenceBackend
 from ..message import SYSTEM_NAME, Message
-
-args = parse_args()
-
-client = get_openai_client(client_type=args.openai_client_type)
-
-OPENAI_CLIENT_TYPE = args.openai_client_type
 
 # Default config follows the OpenAI playground
 DEFAULT_TEMPERATURE = 1.0
@@ -57,19 +51,22 @@ class OpenAIChat(IntelligenceBackend):
             merge_other_agents_as_one_user=merge_other_agents_as_one_user,
             **kwargs,
         )
-
+        self.client_type = kwargs.get("openai_client_type", None)
+        self.client = get_openai_client(self.client_type)
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.model = model
         self.merge_other_agent_as_user = merge_other_agents_as_one_user
+
+
 
     @retry(stop=stop_after_attempt(6), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, messages):
         # Refer to https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/switching-endpoints for how to
         # make API calls
 
-        if OPENAI_CLIENT_TYPE == "openai":
-            completion = client.chat.completions.create(
+        if self.client_type == "openai":
+            completion = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 temperature=self.temperature,
@@ -77,8 +74,8 @@ class OpenAIChat(IntelligenceBackend):
                 stop=STOP,
             )
 
-        elif OPENAI_CLIENT_TYPE == "azure_openai":
-            completion = client.chat.completions.create(
+        elif self.client_type == "azure_openai":
+            completion = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 temperature=self.temperature,
@@ -90,6 +87,7 @@ class OpenAIChat(IntelligenceBackend):
             raise NotImplementedError
 
         response = completion.choices[0].message.content
+
         response = response.strip()
         return response
 

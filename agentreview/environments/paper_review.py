@@ -1,11 +1,10 @@
 import json
-import json
 import logging
 import os.path as osp
 from typing import List
 
 from agentreview.environments import Conversation
-from utility.utils import get_rebuttal_dir
+from agentreview.utility.utils import get_rebuttal_dir
 from .base import TimeStep
 from ..message import Message
 from ..paper_review_message import PaperReviewMessagePool

@@ -148,7 +148,7 @@ def convert_text_into_dict(text: str) -> dict:
 
 
 if __name__ == "__main__":
-    from utility.authentication_utils import read_and_set_openai_key
+    from agentreview.utility.authentication_utils import read_and_set_openai_key
     from agentreview.review import get_lm_review
 
     read_and_set_openai_key()

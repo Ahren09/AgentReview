@@ -16,4 +16,4 @@ transformers
 tenacity
 openai
 gradio
-
+jupyter

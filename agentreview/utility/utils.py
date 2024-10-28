@@ -9,8 +9,8 @@ from typing import Union, List, Dict, Tuple
 import numpy as np
 import pandas as pd
 
-import const
-from utility.general_utils import check_cwd, set_seed
+from agentreview import const
+from agentreview.utility.general_utils import check_cwd, set_seed
 
 
 def generate_num_papers_to_accept(n, batch_number, shuffle=True):
@@ -36,25 +36,25 @@ def generate_num_papers_to_accept(n, batch_number, shuffle=True):
     return array
 
 
-def get_papers_accepted_by_gpt4(gpt4_generated_ac_decisions) -> list:
-    papers_accepted_by_gpt4 = []
+def get_papers_accepted_by_llm(llm_ac_decisions, acceptance_rate: float) -> list:
+    papers_accepted_by_llm = []
 
-    num_papers = sum([len(batch) for batch in gpt4_generated_ac_decisions])
+    num_papers = sum([len(batch) for batch in llm_ac_decisions])
 
     if num_papers == 0:
         raise ValueError("No papers found in batch")
 
-    num_papers_to_accept = generate_num_papers_to_accept(n=paper_review_config.ACCEPTANCE_RATE * num_papers,
-                                                         batch_number=len(gpt4_generated_ac_decisions))
+    num_papers_to_accept = generate_num_papers_to_accept(n=acceptance_rate * num_papers,
+                                                         batch_number=len(llm_ac_decisions))
 
-    for idx_batch, batch in enumerate(gpt4_generated_ac_decisions):
+    for idx_batch, batch in enumerate(llm_ac_decisions):
         tups = sorted([(paper_id, rank) for paper_id, rank in batch.items()], key=lambda x: x[1], reverse=False)
 
         paper_ids = [int(paper_id) for paper_id, rank in tups]
 
-        papers_accepted_by_gpt4 += paper_ids[:num_papers_to_accept[idx_batch]]
+        papers_accepted_by_llm += paper_ids[:num_papers_to_accept[idx_batch]]
 
-    return papers_accepted_by_gpt4
+    return papers_accepted_by_llm
 
 
 def get_paper_decision_mapping(data_dir: str, conference: str, verbose: bool = False):
@@ -151,6 +151,8 @@ def get_rebuttal_dir(output_dir: str,
 
 
 def print_colored(text, color='red'):
+
+    # Dictionary of ANSI color codes for terminal
     foreground_colors = {
         'black': 30,
         'red': 31,
@@ -161,7 +163,16 @@ def print_colored(text, color='red'):
         'cyan': 36,
         'white': 37,
     }
-    print(f"\033[{foreground_colors[color]}m{text}\033[0m")
+    try:
+
+        # get_ipython is specific to Jupyter and IPython.
+        # We use this to decide whether we are running a Jupyter notebook or not.
+        get_ipython
+        print(text)  # Plain text in Jupyter
+    except:
+        # If not Jupyter, print with color codes
+        color_code = foreground_colors.get(color, 31)  # Default to red if color not found
+        print(f"\033[{color_code}m{text}\033[0m")
 
 
 def get_ac_decision_path(output_dir: str, conference: str, model_name: str, ac_scoring_method: str, experiment_name:
@@ -351,70 +362,115 @@ def get_experiment_names(conference: str = "ICLR2023"):
     return experiment_names
 
 
-def load_gpt4_generated_ac_decisions_as_array(experiment_name, **kwargs) -> Tuple[np.ndarray, np.ndarray]:
-    ac_scoring_method = kwargs.pop('ac_scoring_method')
-    acceptance_rate = kwargs.pop('acceptance_rate')
-    conference = kwargs.pop('conference')
-    model_name = kwargs.pop('model_name')
-    num_papers_per_area_chair = kwargs.pop('num_papers_per_area_chair')
+def load_llm_ac_decisions_as_array(
+    output_dir: str,
+    experiment_name: str,
+    ac_scoring_method: str,
+    acceptance_rate: float,
+    conference: str,
+    model_name: str,
+    num_papers_per_area_chair: int
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Loads and processes GPT-4 generated area chair (AC) decisions for an experiment.
 
+    Args:
+        experiment_name (str): Name of the experiment.
+        ac_scoring_method (str): Method used for AC scoring ('ranking' or 'recommendation').
+        acceptance_rate (float): Acceptance rate for the conference.
+        conference (str): Name of the conference.
+        model_name (str): Model name used to generate AC decisions.
+        num_papers_per_area_chair (int): Number of papers assigned to each area chair.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: An array of decisions (True for accept, False for reject)
+            and an array of paper IDs in the order processed.
+
+    Raises:
+        NotImplementedError: If `ac_scoring_method` is not 'ranking' or 'recommendation'.
+    """
     print("=" * 30)
     print(f"Experiment Name: {experiment_name}")
 
-    gpt4_generated_ac_decisions = load_gpt4_generated_ac_decisions(conference=conference,
-                                                                   model_name=model_name,
-                                                                   ac_scoring_method=ac_scoring_method,
-                                                                   experiment_name=experiment_name,
-                                                                   num_papers_per_area_chair=num_papers_per_area_chair)
+    llm_ac_decisions = load_llm_ac_decisions(
+        output_dir=output_dir,
+        conference=conference,
+        model_name=model_name,
+        ac_scoring_method=ac_scoring_method,
+        experiment_name=experiment_name,
+        num_papers_per_area_chair=num_papers_per_area_chair
+    )
 
-    paper_ids = sorted([int(paper_id) for batch in gpt4_generated_ac_decisions for paper_id, rank in batch.items()])
-    # ac_decisions['paper_ids'] = paper_ids
+    paper_ids = sorted(
+        int(paper_id) for batch in llm_ac_decisions for paper_id in batch
+    )
 
     if ac_scoring_method == "ranking":
-        assert len(paper_ids) == len(set(paper_ids)), (f"Duplicate paper_ids found in the AC decisions. "
-                                                       f"{Counter(paper_ids)}")
+        if len(paper_ids) != len(set(paper_ids)):
+            raise ValueError(f"Duplicate paper_ids found in the AC decisions: {Counter(paper_ids)}")
 
-        papers_accepted_by_gpt4 = get_papers_accepted_by_gpt4(gpt4_generated_ac_decisions, acceptance_rate)
-
-        # True means accept, False means reject
-        decisions_gpt4 = np.array(
-            [True if paper_id in papers_accepted_by_gpt4 else False for paper_id in paper_ids])
+        papers_accepted_by_llm = get_papers_accepted_by_llm(llm_ac_decisions, acceptance_rate)
+        decisions_llm = np.array([paper_id in papers_accepted_by_llm for paper_id in paper_ids])
 
     elif ac_scoring_method == "recommendation":
-        gpt4_generated_ac_decisions = {int(k): v for batch in gpt4_generated_ac_decisions for k, v in batch.items()}
-        decisions_gpt4 = np.array(
-            [True if gpt4_generated_ac_decisions[paper_id].startswith("Accept") else False for paper_id in
-             paper_ids])
-
+        llm_ac_decisions_flat = {int(k): v for batch in llm_ac_decisions for k, v in batch.items()}
+        decisions_llm = np.array(
+            [llm_ac_decisions_flat[paper_id].startswith("Accept") for paper_id in paper_ids]
+        )
     else:
-        raise NotImplementedError
+        raise NotImplementedError(f"Scoring method '{ac_scoring_method}' not implemented.")
 
-    return decisions_gpt4, paper_ids
+    return decisions_llm, np.array(paper_ids)
 
 
-def load_gpt4_generated_ac_decisions(**kwargs) -> List[Dict]:
-    num_papers_per_area_chair = kwargs.pop('num_papers_per_area_chair')
-    path = get_ac_decision_path(**kwargs)
+def load_llm_ac_decisions(
+    output_dir: str,
+    conference: str,
+    model_name: str,
+    ac_scoring_method: str,
+    experiment_name: str,
+    num_papers_per_area_chair: int
+) -> List[Dict[str, str]]:
+    """Loads GPT-4 generated area chair (AC) decisions from a specified path.
+
+    Args:
+        conference (str): Name of the conference.
+        model_name (str): Model name used to generate AC decisions.
+        ac_scoring_method (str): Method used for AC scoring ('ranking' or 'recommendation').
+        experiment_name (str): Name of the experiment.
+        num_papers_per_area_chair (int): Number of papers assigned to each area chair.
+
+    Returns:
+        List[Dict[str, str]]: List of batches, where each batch contains paper ID and decision.
+
+    Raises:
+        AssertionError: If a non-final batch has a paper count different from `num_papers_per_area_chair`.
+    """
+    path = get_ac_decision_path(
+        output_dir=output_dir,
+        conference=conference,
+        model_name=model_name,
+        ac_scoring_method=ac_scoring_method,
+        experiment_name=experiment_name
+    )
 
     if osp.exists(path):
-        ac_decision = json.load(open(path, 'r', encoding='utf-8'))
+        with open(path, 'r', encoding='utf-8') as file:
+            ac_decision = json.load(file)
         print(f"Loaded {len(ac_decision)} batches of existing AC decisions from {path}")
-
     else:
         ac_decision = []
         print(f"No existing AC decisions found at {path}")
 
-    ac_decision = [batch for batch in ac_decision if len(batch) > 0]
+    ac_decision = [batch for batch in ac_decision if batch]  # Remove empty batches
 
     for i, batch in enumerate(ac_decision):
         if i != len(ac_decision) - 1:
-            assert len(batch) == num_papers_per_area_chair, (f"Batch {i} has {len(batch)} papers, "
-                                                             f"but each AC should be assigned"
-                                                             f" {num_papers_per_area_chair} "
-                                                             f"unless it is the last batch.")
+            if len(batch) != num_papers_per_area_chair:
+                raise AssertionError(
+                    f"Batch {i} has {len(batch)} papers, expected {num_papers_per_area_chair} for non-final batches."
+                )
 
     return ac_decision
-
 
 def write_to_excel(data, file_path, sheet_name):
     """
@@ -436,7 +492,7 @@ def write_to_excel(data, file_path, sheet_name):
             data.to_excel(writer, sheet_name=sheet_name, index=False)
 
 
-def save_gpt4_generated_ac_decisions(ac_decisions: List[dict], **kwargs):
+def save_llm_ac_decisions(ac_decisions: List[dict], **kwargs):
     path = get_ac_decision_path(**kwargs)
 
     json.dump(ac_decisions, open(path, 'w', encoding='utf-8'), indent=2)

@@ -1,3 +1,5 @@
+from typing import Union
+
 default_reviewer_setting = {
     "is_benign": None,
     "is_knowledgeable": None,
@@ -6,7 +8,7 @@ default_reviewer_setting = {
 }
 
 
-def get_experiment_settings(setting: dict):
+def get_experiment_settings(paper_id: Union[int, None] = None, paper_decision: Union[str, None] = None, setting: dict = None):
     """
     Generate experiment settings based on provided configurations for area chairs (AC) and reviewers.
 
@@ -19,7 +21,8 @@ def get_experiment_settings(setting: dict):
     """
 
     experiment_setting = {
-        "id": None,
+        "paper_id": paper_id,
+        "paper_decision": paper_decision,
         "players": {
 
             # Paper Extractor is a special player that extracts a paper from the dataset.

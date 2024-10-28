@@ -26,7 +26,8 @@ def parse_args():
 
 
     parser.add_argument(
-        "--api_version", type=str, default="2023-03-15-preview", help="API version to be used for making requests. Required for Azure OpenAI clients."
+        "--api_version", type=str, default="2023-05-15", help="API version to be used for making requests. Required "
+                                                              "for Azure OpenAI clients."
     )
 
     # Experiment configuration
@@ -54,11 +55,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--ignore_missing_metareviews", action="store_true", help="If set, missing metareviews are ignored, allowing the experiment to continue without them."
-    )
-
-    parser.add_argument(
         "--overwrite", action="store_true", help="If set, existing results or output files will be overwritten without prompting."
+    )
+    parser.add_argument(
+        "--skip_logging", action="store_true", help="If set, we do not log the messages in the console."
     )
 
     parser.add_argument(

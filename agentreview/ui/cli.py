@@ -1,5 +1,4 @@
 import logging
-import logging
 import os
 import os.path as osp
 from typing import Union
@@ -11,8 +10,8 @@ from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.styles import Style
 from rich.console import Console
 
-from utility.utils import get_rebuttal_dir, load_gpt4_generated_ac_decisions, \
-    save_gpt4_generated_ac_decisions
+from agentreview.utility.utils import get_rebuttal_dir, load_llm_ac_decisions, \
+    save_llm_ac_decisions
 from ..arena import Arena, TooManyInvalidActions
 from ..backends.human import HumanBackendError
 from ..environments import PaperReview, PaperDecision
@@ -222,7 +221,8 @@ class ArenaCLI:
             # Print the new messages
             for msg in messages:
                 message_str = f"[{msg.agent_name}->{msg.visible_to}]: {msg.content}"
-                console.print(color_dict[name_to_color[msg.agent_name]] + message_str + CRStyle.RESET_ALL)
+                if self.args.skip_logging:
+                    console.print(color_dict[name_to_color[msg.agent_name]] + message_str + CRStyle.RESET_ALL)
                 msg.logged = True
 
             step += 1
@@ -251,7 +251,7 @@ class ArenaCLI:
             self.arena.save_history(path_review_history)
 
         elif env.type_name == "paper_decision":
-            ac_decisions = load_gpt4_generated_ac_decisions(output_dir=args.output_dir,
+            ac_decisions = load_llm_ac_decisions(output_dir=args.output_dir,
                                                             conference=args.conference,
                                                             model_name=args.model_name,
                                                             ac_scoring_method=args.ac_scoring_method,
@@ -261,9 +261,9 @@ class ArenaCLI:
 
             ac_decisions += [env.ac_decisions]
 
-            save_gpt4_generated_ac_decisions(ac_decisions,
-                                             output_dir=args.output_dir,
-                                             conference=args.conference,
-                                             model_name=args.model_name,
-                                             ac_scoring_method=args.ac_scoring_method,
-                                             experiment_name=args.experiment_name)
+            save_llm_ac_decisions(ac_decisions,
+                                 output_dir=args.output_dir,
+                                 conference=args.conference,
+                                 model_name=args.model_name,
+                                 ac_scoring_method=args.ac_scoring_method,
+                                 experiment_name=args.experiment_name)

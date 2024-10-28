@@ -15,14 +15,14 @@ import os
 import time
 import requests
 
-from arguments import parse_args
+from agentreview.arguments import parse_args
 
 try:
     import openreview
 except ImportError:
     raise ImportError("Please install openreview package using `pip install openreview-py`")
 
-def download_papers():
+def download_papers(args):
     """Downloads all papers from ICLR 2023 using OpenReview API.
 
     This function authenticates with the OpenReview API using environment
@@ -35,8 +35,6 @@ def download_papers():
                         variables are not set.
         AssertionError: If the conference argument is not for ICLR.
     """
-
-    args = parse_args()
 
     openreview_username = os.environ.get("OPENREVIEW_USERNAME")
     openreview_password = os.environ.get("OPENREVIEW_PASSWORD")
@@ -133,4 +131,5 @@ def download_papers():
 
 
 if __name__ == "__main__":
-    download_papers()
+    args = parse_args()
+    download_papers(args)

@@ -69,8 +69,10 @@ class Player(Agent):
         self.data_dir = kwargs.pop("data_dir", None)
         self.args = args
 
+
         if isinstance(backend, BackendConfig):
             backend_config = backend
+            backend_config['openai_client_type'] = args.openai_client_type
             backend = load_backend(backend_config)
         elif isinstance(backend, IntelligenceBackend):
             backend_config = backend.to_config()

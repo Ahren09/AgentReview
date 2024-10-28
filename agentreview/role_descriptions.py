@@ -5,7 +5,7 @@ import numpy as np
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import const
+from agentreview import const
 from agentreview.config import AgentConfig
 
 PLAYER_BACKEND = {

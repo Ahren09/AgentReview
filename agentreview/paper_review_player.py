@@ -56,6 +56,8 @@ class Reviewer(Player):
             global_prompt: str = None,
             **kwargs,
     ):
+        print("kwargs")
+        print(kwargs)
         super().__init__(name, role_desc, backend, global_prompt, **kwargs)
 
     def act(self, observation: List[Message]) -> str:
@@ -94,7 +96,7 @@ class PaperExtractorPlayer(Player):
         Returns:
             str: The action (response) of the player.
         """
-        print("Improve paper loading")
+
         logging.info(f"Loading {self.conference} paper {self.paper_id} ({self.paper_decision}) ...")
 
         loader = PDFReader()

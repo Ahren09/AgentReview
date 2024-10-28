@@ -22,9 +22,8 @@ from tqdm import tqdm
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import const
-from arguments import parse_args
-from utility.utils import print_colored
+from agentreview.arguments import parse_args
+from agentreview.utility.utils import print_colored
 
 decision_map = {
     # ICLR 2023

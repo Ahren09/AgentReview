@@ -10,6 +10,8 @@ PAPER_DECISIONS_ICLR2019 = ["Accept-oral", "Accept-poster", "Reject"]
 
 AREA_CHAIR_TYPES = ['inclusive', 'conformist', 'authoritarian', 'BASELINE']
 
+GLOBAL_PROMPT = "This is a realistic simulation of academic peer review."
+
 # These are papers that contain potentially sensitive content. GPT-4 refused to generate reviews for these papers.
 FILTERED_PAPER_IDS = {
     "ICLR2020": [],
