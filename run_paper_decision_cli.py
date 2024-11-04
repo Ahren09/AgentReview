@@ -39,6 +39,8 @@ def main(args):
     """
     args.task = "paper_decision"
 
+    print(const.AGENTREVIEW_LOGO)
+
     # Sample Paper IDs from each category
     paper_id2decision, paper_decision2ids = get_paper_decision_mapping(args.data_dir, args.conference)
 
@@ -98,31 +100,6 @@ def main(args):
 
         players = initialize_players(experiment_setting=experiment_setting, args=args)
 
-        # players = []
-        #
-        # for role, players_li in experiment_setting["players"].items():
-        #
-        #     for i, player_config in enumerate(players_li):
-        #
-        #         # This phase should only contain the Area Chair
-        #         if role == "AC":
-        #
-        #             player_config = get_ac_config(env_type="paper_decision",
-        #                                           scoring_method=args.ac_scoring_method,
-        #                                           num_papers_per_area_chair=args.num_papers_per_area_chair,
-        #                                           global_settings=experiment_setting['global_settings'],
-        #                                           acceptance_rate=args.acceptance_rate
-        #                                                           ** player_config)
-        #
-        #             # player_config = AgentConfig(**player_config)
-        #             player_config['model'] = args.model_name
-        #             player = AreaChair(**player_config)
-        #
-        #         else:
-        #             raise NotImplementedError(f"Unknown role: {role}")
-        #
-        #         players.append(player)
-
         player_names = [player.name for player in players]
 
         if batch_index >= num_batches - 1:  # Last batch. Include all remaining papers
@@ -138,7 +115,6 @@ def main(args):
 
         arena = PaperReviewArena(players=players, environment=env, args=args, global_prompt=const.GLOBAL_PROMPT)
         arena.launch_cli(interactive=False)
-
 
 if __name__ == "__main__":
     project_setup()

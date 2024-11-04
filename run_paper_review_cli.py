@@ -45,6 +45,8 @@ def main(args: Namespace):
 
     args.task = "paper_review"
 
+    print(const.AGENTREVIEW_LOGO)
+
     paper_id2decision, paper_decision2ids = get_paper_decision_mapping(args.data_dir, args.conference)
 
     # Sample paper IDs for the simulation from existing data.
@@ -66,65 +68,6 @@ def main(args: Namespace):
         players = initialize_players(experiment_setting=experiment_setting, args=args)
 
         player_names = [player.name for player in players]
-
-        # for role, players_list in experiment_setting["players"].items():
-        #
-        #     for i, player_config in enumerate(players_list):
-        #         if role == "Paper Extractor":
-        #
-        #             player_config = get_paper_extractor_config(global_settings=experiment_setting['global_settings'], )
-        #
-        #             player = PaperExtractorPlayer(data_dir=args.data_dir, paper_id=paper_id,
-        #                                           paper_decision=paper_decision,
-        #                                           args=args,
-        #                                           conference=args.conference, **player_config)
-        #
-        #             player_names.append(player.name)
-        #
-        #
-        #         elif role == "AC":
-        #
-        #             player_config = get_ac_config(env_type="paper_review",
-        #                                           scoring_method=args.ac_scoring_method,
-        #                                           num_papers_per_area_chair=args.num_papers_per_area_chair,
-        #                                           global_settings=experiment_setting['global_settings'],
-        #                                           acceptance_rate=args.acceptance_rate,
-        #                                           **player_config)
-        #
-        #             player_config['model'] = args.model_name
-        #
-        #             player = AreaChair(data_dir=args.data_dir,
-        #                                conference=args.conference,
-        #                                args=args,
-        #                                **player_config)
-        #
-        #             player_names.append(player.name)
-        #
-        #
-        #         elif role == "Author":
-        #
-        #             # Author requires no behavior customization.
-        #             # So we directly use the Player class
-        #             player_config = get_author_config()
-        #             player = Player(data_dir=args.data_dir,
-        #                             conference=args.conference,
-        #                             args=args,
-        #                             **player_config)
-        #
-        #             player_names.append(player.name)
-        #
-        #         elif role == "Reviewer":
-        #             player_config = get_reviewer_player_config(reviewer_index=i + 1,
-        #                                                        global_settings=experiment_setting['global_settings'],
-        #                                                        **player_config)
-        #             player_config['model'] = args.model_name
-        #             player = Reviewer(data_dir=args.data_dir, conference=args.conference, **player_config)
-        #             player_names.append(player.name)
-        #
-        #         else:
-        #             raise NotImplementedError(f"Unknown role: {role}")
-        #
-        #         players.append(player)
 
         env = PaperReview(player_names=player_names, paper_decision=paper_decision, paper_id=paper_id,
                           args=args, experiment_setting=experiment_setting)

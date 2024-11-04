@@ -14,19 +14,10 @@ from agentreview.utility.utils import get_rebuttal_dir, load_llm_ac_decisions, \
     save_llm_ac_decisions
 from ..arena import Arena, TooManyInvalidActions
 from ..backends.human import HumanBackendError
+from ..const import AGENTREVIEW_LOGO
 from ..environments import PaperReview, PaperDecision
 
 # Get the ASCII art from https://patorjk.com/software/taag/#p=display&f=Big&t=Chat%20Arena
-ASCII_ART = r"""
-                           _   _____            _               
-     /\                   | | |  __ \          (_)              
-    /  \   __ _  ___ _ __ | |_| |__) |_____   ___  _____      __
-   / /\ \ / _` |/ _ \ '_ \| __|  _  // _ \ \ / / |/ _ \ \ /\ / /
-  / ____ \ (_| |  __/ | | | |_| | \ \  __/\ V /| |  __/\ V  V / 
- /_/    \_\__, |\___|_| |_|\__|_|  \_\___| \_/ |_|\___| \_/\_/  
-           __/ |                                                
-          |___/                                                                                   
-"""
 
 color_dict = {
     "red": Fore.RED,
@@ -87,7 +78,6 @@ class ArenaCLI:
 
         console = Console()
         # Print ascii art
-        console.print(ASCII_ART, style="bold dark_orange3")
         timestep = self.arena.reset()
         console.print("🎓AgentReview Initialized!", style="bold green")
 
