@@ -199,7 +199,7 @@ def get_reviewer_description(is_benign: bool = None, is_knowledgeable: bool = No
                                  "critically analyze the methodologies, and carefully consider the paper's "
                                  "contribution to the field. ")
 
-    desc_lazy_reviewer = ("As a lazy reviewer, your reviews tend to be superficial and hastily done. You do not like "
+    desc_irresponsible_reviewer = ("As a lazy reviewer, your reviews tend to be superficial and hastily done. You do not like "
                           "to discuss in the reviewer-AC discussion. "
                           "Your assessments might overlook critical details, lack depth in analysis, "
                           "fail to recognize novel contributions, "
@@ -210,7 +210,7 @@ def get_reviewer_description(is_benign: bool = None, is_knowledgeable: bool = No
         if is_responsible:
             desc = desc_responsible_reviewer
         else:
-            desc = desc_lazy_reviewer
+            desc = desc_irresponsible_reviewer
 
         bio += f"Responsibility: {desc}\n\n"
 

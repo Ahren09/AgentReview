@@ -66,35 +66,28 @@ def get_reviewer_setting_from_reviewer_type(reviewer_type: str):
     }
 
     # Intention
-    if reviewer_type == "benign":
+    if "benign" in reviewer_type:
         reviewer_setting["is_benign"] = True
-    elif reviewer_type == "malicious":
+    if "malicious" in reviewer_type:
         reviewer_setting["is_benign"] = False
 
     # Knowledgeability
-    elif reviewer_type == "knowledgeable":
+    if "knowledgeable" in reviewer_type:
         reviewer_setting["is_knowledgeable"] = True
-    elif reviewer_type == "unknowledgeable":
+    if "unknowledgeable" in reviewer_type:
         reviewer_setting["is_knowledgeable"] = False
 
     # Commitment
-    elif reviewer_type == "responsible":
+    if "responsible" in reviewer_type:
         reviewer_setting["is_responsible"] = True
-    elif reviewer_type == "irresponsible":
+    if "irresponsible" in reviewer_type:
         reviewer_setting["is_responsible"] = False
 
-    elif reviewer_type in ["BASELINE"]:
-        pass
-
-    elif reviewer_type in ["authors_are_famous"]:
+    if reviewer_type in ["authors_are_famous"]:
         reviewer_setting["knows_authors"] = "famous"
 
     elif reviewer_type in ["authors_are_unfamous"]:
         reviewer_setting["knows_authors"] = "unfamous"
-
-
-    else:
-        raise ValueError(f"Unknown reviewer type: {reviewer_type}")
 
     return reviewer_setting
 

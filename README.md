@@ -104,6 +104,17 @@ export AZURE_OPENAI_KEY=... # Your Azure OpenAI key here
 
 A demo can be found in `notebooks/demo.ipynb`
 
+### Customizing your own environment
+
+You can add a new setting in `agentreview/experiment_config.py`, then add the setting as a new entry to the `all_settings` dictionary:
+
+```python
+all_settings = {
+    "BASELINE": baseline_setting,
+    "benign_Rx1": benign_Rx1_setting,
+    ...
+    "your_setting_name": your_setting
+```
 
 ## Framework Overview
 

@@ -1,18 +1,22 @@
 import argparse
 import logging
 import os
-import sys
+
+logger = logging.getLogger(__name__)
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Argument parser for configuring OpenAI API and experiment settings")
 
     # Authentication details for OpenAI API
     parser.add_argument(
-        "--openai_key", type=str, default=None, help="API key to authenticate with OpenAI. Can be set via this argument or through the OPENAI_API_KEY environment variable."
+        "--openai_key", type=str, default=None,
+        help="API key to authenticate with OpenAI. Can be set via this argument or through the OPENAI_API_KEY environment variable."
     )
 
     parser.add_argument(
-        "--deployment", type=str, default=None, help="For Azure OpenAI: the deployment name to be used when calling the API."
+        "--deployment", type=str, default=None,
+        help="For Azure OpenAI: the deployment name to be used when calling the API."
     )
 
     parser.add_argument(
@@ -21,9 +25,9 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--endpoint", type=str, default=None, help="For Azure OpenAI: custom endpoint to access the API. Should be in the format 'https://<your-endpoint>.openai.azure.com'."
+        "--endpoint", type=str, default=None,
+        help="For Azure OpenAI: custom endpoint to access the API. Should be in the format 'https://<your-endpoint>.openai.azure.com'."
     )
-
 
     parser.add_argument(
         "--api_version", type=str, default="2023-05-15", help="API version to be used for making requests. Required "
@@ -37,7 +41,8 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--conference", type=str, default="ICLR2023", help="Conference name where the papers are being evaluated, e.g., 'ICLR2023'."
+        "--conference", type=str, default="ICLR2023",
+        help="Conference name where the papers are being evaluated, e.g., 'ICLR2023'."
     )
 
     parser.add_argument(
@@ -47,22 +52,20 @@ def parse_args():
     parser.add_argument(
         "--experiment_name",
         type=str, default=None, required=False,
-        choices=[
-            "BASELINE", "benign_Rx1", "malicious_Rx1", "malicious_Rx2", "malicious_Rx3", "unknowledgeable_Rx1",
-            "knowledgeable_Rx1", "responsible_Rx1", "irresponsible_Rx1", "irresponsible_Rx2", "irresponsible_Rx3",
-            "inclusive_ACx1", "authoritarian_ACx1", "conformist_ACx1", "no_numeric_ratings"],
         help="Specifies the name of the experiment to run. Choose from predefined experiment types based on the reviewer and AC behavior or experiment configuration."
     )
 
     parser.add_argument(
-        "--overwrite", action="store_true", help="If set, existing results or output files will be overwritten without prompting."
+        "--overwrite", action="store_true",
+        help="If set, existing results or output files will be overwritten without prompting."
     )
     parser.add_argument(
         "--skip_logging", action="store_true", help="If set, we do not log the messages in the console."
     )
 
     parser.add_argument(
-        "--num_papers_per_area_chair", type=int, default=10, help="The number of papers each area chair is assigned for evaluation."
+        "--num_papers_per_area_chair", type=int, default=10,
+        help="The number of papers each area chair is assigned for evaluation."
     )
 
     # Model configuration
@@ -83,18 +86,19 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--visual_dir", type=str, default="outputs/visual", help="Directory where visualization files (such as graphs and plots) will be stored."
+        "--visual_dir", type=str, default="outputs/visual",
+        help="Directory where visualization files (such as graphs and plots) will be stored."
     )
 
     # System configuration
     parser.add_argument(
-        "--device", type=str, default='cuda', help="The device to be used for processing (e.g., 'cuda' for GPU acceleration or 'cpu' for standard processing)."
+        "--device", type=str, default='cuda',
+        help="The device to be used for processing (e.g., 'cuda' for GPU acceleration or 'cpu' for standard processing)."
     )
 
     parser.add_argument(
         "--data_dir", type=str, default='data', help="Directory where input data (e.g., papers) are stored."
     )
-
 
     parser.add_argument(
         "--acceptance_rate", type=float, default=0.32,
@@ -125,6 +129,17 @@ def parse_args():
             assert isinstance(args.openai_key, str), ("Please specify the `--openai_key` argument OR set the "
                                                       "OPENAI_API_KEY environment variable.")
             raise ValueError("OpenAI key is missing.")
+
+    EXISTING_EXPERIMENT_SETTINGS = [
+        "BASELINE", "benign_Rx1", "malicious_Rx1", "malicious_Rx2", "malicious_Rx3", "unknowledgeable_Rx1",
+        "knowledgeable_Rx1", "responsible_Rx1", "irresponsible_Rx1", "irresponsible_Rx2", "irresponsible_Rx3",
+        "inclusive_ACx1", "authoritarian_ACx1", "conformist_ACx1", "no_numeric_ratings"]
+
+    if args.experiment_name not in EXISTING_EXPERIMENT_SETTINGS:
+        logger.warning(f"Experiment name '{args.experiment_name}' is not recognized. "
+                       f"This can happen if you are customizing your own experiment settings. "
+                       f"Otherwise, please choose from the following: "
+                       f"{EXISTING_EXPERIMENT_SETTINGS}")
 
     if args.openai_client_type == "azure_openai":
         if os.environ.get('AZURE_OPENAI_KEY') is None:
