@@ -88,6 +88,7 @@ def get_instructions_for_overall_scores(author_type: str) -> str:
 
     return instruction
 
+
 def get_reviewer_description(is_benign: bool = None, is_knowledgeable: bool = None, is_responsible: bool = None,
                              provides_numeric_rating:
                              bool = True, knows_authors: bool = False, phase: str = "reviewer_write_reviews"):
@@ -199,11 +200,12 @@ def get_reviewer_description(is_benign: bool = None, is_knowledgeable: bool = No
                                  "critically analyze the methodologies, and carefully consider the paper's "
                                  "contribution to the field. ")
 
-    desc_irresponsible_reviewer = ("As a lazy reviewer, your reviews tend to be superficial and hastily done. You do not like "
-                          "to discuss in the reviewer-AC discussion. "
-                          "Your assessments might overlook critical details, lack depth in analysis, "
-                          "fail to recognize novel contributions, "
-                          "or offer generic feedback that does little to advance the paper's quality.")
+    desc_irresponsible_reviewer = (
+        "As a lazy reviewer, your reviews tend to be superficial and hastily done. You do not like "
+        "to discuss in the reviewer-AC discussion. "
+        "Your assessments might overlook critical details, lack depth in analysis, "
+        "fail to recognize novel contributions, "
+        "or offer generic feedback that does little to advance the paper's quality.")
 
     if is_responsible is not None:
 
