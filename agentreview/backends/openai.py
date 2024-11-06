@@ -64,6 +64,7 @@ class OpenAIChat(IntelligenceBackend):
     def _get_response(self, messages):
         # Refer to https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/switching-endpoints for how to
         # make API calls
+        return 'hello'  # FIXME: remove this line
 
         if self.client_type == "openai":
             completion = self.client.chat.completions.create(

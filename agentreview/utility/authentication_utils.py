@@ -16,13 +16,6 @@ def get_openai_client(client_type: str):
 
     assert client_type in ["azure_openai", "openai"]
 
-    endpoint: str = os.environ['AZURE_ENDPOINT']
-
-    if not endpoint.startswith("https://"):
-        endpoint = f"https://{endpoint}.openai.azure.com"
-
-    os.environ['AZURE_ENDPOINT'] = endpoint
-
     if not os.environ.get('OPENAI_API_VERSION'):
         os.environ['OPENAI_API_VERSION'] = "2023-05-15"
 
@@ -32,6 +25,13 @@ def get_openai_client(client_type: str):
         )
 
     elif client_type == "azure_openai":
+        endpoint: str = os.environ['AZURE_ENDPOINT']
+
+        if not endpoint.startswith("https://"):
+            endpoint = f"https://{endpoint}.openai.azure.com"
+
+        os.environ['AZURE_ENDPOINT'] = endpoint
+        
         client = openai.AzureOpenAI(
             api_key=os.environ['AZURE_OPENAI_KEY'],
             azure_endpoint=os.environ['AZURE_ENDPOINT'],  # f"https://YOUR_END_POINT.openai.azure.com"

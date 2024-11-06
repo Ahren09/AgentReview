@@ -101,6 +101,7 @@ class PaperReviewArena(Arena):
                 player.role_desc = get_reviewer_description(phase="reviewer_ac_discussion",
                                                             **self.environment.experiment_setting["players"][
                                                                 'Reviewer'][reviewer_index - 1])
+                
 
             elif self.environment.phase_index == 5:  # Phase 5 AC Makes Decisions
 
