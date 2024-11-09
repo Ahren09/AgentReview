@@ -369,7 +369,7 @@ Using Multi-Agent to review your paper!.
         paper_id = "12345"
         
         # Notion: 此处设置参数，experiment_name为无效填充参数
-        args = Namespace(openai_client_type="openai",
+        args = Namespace(openai_client_type="azure_openai",
                          experiment_name="test",
                          max_num_words=16384)
         
@@ -609,4 +609,4 @@ Using Multi-Agent to review your paper!.
 
     
 demo.queue()
-demo.launch(debug=DEBUG, server_port=8082) 
+demo.launch() 
