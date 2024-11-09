@@ -367,6 +367,8 @@ Using Multi-Agent to review your paper!.
         paper_decision = "Accept"
         data_dir = ''
         paper_id = "12345"
+        
+        # Notion: 此处设置参数，experiment_name为无效填充参数
         args = Namespace(openai_client_type="openai",
                          experiment_name="test",
                          max_num_words=16384)
@@ -484,7 +486,6 @@ Using Multi-Agent to review your paper!.
         
         return arena
         
-
     def step_game(all_comps: dict):
         global CURRENT_STEP_INDEX
         
@@ -503,7 +504,6 @@ Using Multi-Agent to review your paper!.
         else:
             arena = cur_state["arena"]
         
-        # 当timestep.terminal 为真时才停止运行
         # TODO: 连续运行
         
         timestep = arena.step()
@@ -593,7 +593,6 @@ Using Multi-Agent to review your paper!.
             and comp is not upload_file_box
         ):
             comp.change(_disable_step_button, state, btn_step)
-
 
     # print(set(all_components + [state]))
     btn_step.click(
