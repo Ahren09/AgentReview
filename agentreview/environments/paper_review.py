@@ -211,3 +211,7 @@ class PaperReview(Conversation):
                 player_name, phase_index=self.phase_index, next_player_idx=self._next_player_index,
                 player_names=self.player_names
             )
+
+    def get_messages_from_player(self, player_name: str) -> List[str]:
+        """Get the list of actions that the player can take."""
+        return self.message_pool.get_messages_from_player(player_name)

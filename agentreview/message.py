@@ -84,6 +84,7 @@ class MessagePool:
         """
         self._messages.append(message)
 
+
     def print(self):
         """Print all the messages in the pool."""
         for message in self._messages:
@@ -148,3 +149,16 @@ class MessagePool:
             ):
                 visible_messages.append(message)
         return visible_messages
+
+    def get_messages_from_player(self, player_name: str) -> List[Message]:
+        """
+        Get all the messages from a given player.
+
+        Parameters:
+            player_name (str): The name of the player.
+
+        Returns:
+            List[Message]: A list of messages from the player.
+        """
+        return [message for message in self._messages if message.agent_name == player_name]
+

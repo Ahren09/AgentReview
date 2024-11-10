@@ -14,7 +14,8 @@ from agentreview.environments import PaperReview
 from agentreview.paper_review_arena import PaperReviewArena
 from agentreview.utility.experiment_utils import initialize_players
 from agentreview.paper_review_player import PaperExtractorPlayer, AreaChair, Reviewer
-from agentreview.role_descriptions import get_reviewer_description, get_ac_description, get_author_config, get_paper_extractor_config
+from agentreview.role_descriptions import (get_reviewer_description, get_ac_description, get_author_config,
+                                           get_paper_extractor_config, get_author_description)
 
 # 该文件的使命是前端交互：构建前端页面，从页面中获取用户的配置，传入后端运行，将结果实时展示到相应模块
 
@@ -37,8 +38,8 @@ css = """#col-container {max-width: 90%; margin-left: auto; margin-right: auto; 
 DEBUG = False
 
 DEFAULT_BACKEND = "openai-chat"
-MAX_NUM_PLAYERS = 4
-DEFAULT_NUM_PLAYERS = 4
+MAX_NUM_PLAYERS = 5
+DEFAULT_NUM_PLAYERS = 5
 CURRENT_STEP_INDEX = 0
 
 def load_examples():
@@ -78,7 +79,7 @@ def get_player_components(name, visible):
             # )
             
             with gr.Row():
-            # 将三个属性做成dropdown
+                # Converting the three attributes into dropdowns
                 Intention_config = gr.Dropdown(
                     choices=["Benign", "Malicious", "Neutral"],
                     interactive=True,
@@ -96,7 +97,7 @@ def get_player_components(name, visible):
                 )
                 
                 Responsibility_config = gr.Dropdown(
-                    choices=["Responsible", "Lazy", "Normal"],
+                    choices=["Responsible", "Irresponsible", "Normal"],
                     interactive=True,
                     label = "Responsibility",
                     show_label=True,
@@ -113,10 +114,7 @@ def get_player_components(name, visible):
                 autoscroll=False,
                 value=get_reviewer_description()
             )
-            
-            # role_desc = gr.Markdown(value=get_reviewer_description(), 
-            #                         visible=visible)
-            
+
             def update_role_desc(Intention_config, Knowledge_config, Responsibility_config):
                 
                 is_benign = True if Intention_config == "Benign" else (False if Intention_config == "Malicious" else None)
@@ -142,7 +140,7 @@ def get_player_components(name, visible):
                 f"{name} Parameters", open=False, visible=visible
             ) as accordion:
                 temperature = gr.Slider(
-                    minimum=0,
+                    minimum=0.,
                     maximum=2.0,
                     step=0.1,
                     interactive=True,
@@ -161,6 +159,51 @@ def get_player_components(name, visible):
                 )
 
     return [role_name, Intention_config, Knowledge_config, Responsibility_config, backend_type, accordion, temperature, max_tokens]
+
+
+def get_author_components(name, visible):
+    with gr.Row():
+        with gr.Column():
+            role_desc = gr.Textbox(
+                lines=8,
+                max_lines=8,
+                show_label=False,
+                interactive=True,
+                visible=visible,
+                value=get_author_description(),
+            )
+        with gr.Column():
+            backend_type = gr.Dropdown(
+                show_label=False,
+                choices=list(BACKEND_REGISTRY.keys()),
+                interactive=True,
+                visible=visible,
+                value=DEFAULT_BACKEND,
+            )
+            with gr.Accordion(
+                f"{name} Parameters", open=False, visible=visible
+            ) as accordion:
+                temperature = gr.Slider(
+                    minimum=0.,
+                    maximum=2.0,
+                    step=0.1,
+                    interactive=True,
+                    visible=visible,
+                    label="temperature",
+                    value=0.7,
+                )
+                max_tokens = gr.Slider(
+                    minimum=10,
+                    maximum=500,
+                    step=10,
+                    interactive=True,
+                    visible=visible,
+                    label="max tokens",
+                    value=200,
+                )
+
+    return [role_desc, backend_type, accordion, temperature, max_tokens]
+
 
 def get_area_chair_components(name, visible):
     with gr.Row():
@@ -191,13 +234,13 @@ def get_area_chair_components(name, visible):
                 visible=visible,
                 value=get_ac_description("BASELINE", "ac_write_metareviews", 'None', 1),
             )
-            
+
             def update_role_desc(AC_type):
                 ac_type = 'BASELINE' if AC_type == "Normal" else AC_type.lower()
                 return get_ac_description(ac_type, "ac_write_metareviews", "None", 1) # FIXME:依据阶段变化
-                
+
             AC_type.select(fn=update_role_desc, inputs=[AC_type], outputs=[role_desc])
-            
+
         with gr.Column():
             backend_type = gr.Dropdown(
                 show_label=False,
@@ -235,14 +278,14 @@ def get_empty_state():
     return gr.State({"arena": None})
 
 
-with gr.Blocks(css=css) as demo:
+with (gr.Blocks(css=css) as demo):
     state = get_empty_state()
     all_components = []
 
     with gr.Column(elem_id="col-container"):
         gr.Markdown(
-            """# 🤖 AgentReview<br>
-Using Multi-Agent to review your paper!.
+            """# 🤖[AgentReview](https://arxiv.org/abs/2406.12708)<br>
+S Multi-Agent to Simulate conference reviews on your own papers.
 **[Project Homepage](https://github.com/Ahren09/AgentReview)**""",
             elem_id="header",
         )
@@ -269,14 +312,22 @@ Using Multi-Agent to review your paper!.
 
                 player_chatbots = []
                 for i in range(MAX_NUM_PLAYERS):
-                    player_name = f"Reviewer {i + 1}" if i < MAX_NUM_PLAYERS-1 else "AC"
+                    if i in [0, 1, 2]:
+                        player_name = f"Reviewer {i + 1}"
+
+                    elif i == 3:
+                        player_name = "AC"
+
+                    elif i == 4:
+                        player_name = "Author"
+
                     with gr.Tab(player_name, visible=(i < DEFAULT_NUM_PLAYERS)):
                         player_chatbot = gr.Chatbot(
                             elem_id=f"chatbox-{i}",
                             visible=i < DEFAULT_NUM_PLAYERS,
                             label=player_name,
                             show_label=False,
-                            height=600,  # FIXME: 无效设置
+                            height=600,  # FIXME: this parameter is not working
                         )
                         player_chatbots.append(player_chatbot)
 
@@ -292,17 +343,30 @@ Using Multi-Agent to review your paper!.
                 all_players_components, players_idx2comp = [], {}
                 with gr.Blocks():
                     for i in range(MAX_NUM_PLAYERS):
-                        
-                        player_name = f"Reviewer {i + 1}" if i < MAX_NUM_PLAYERS-1 else "AC"
+                        if i in [0, 1, 2]:
+                            player_name = f"Reviewer {i + 1}"
+
+                        elif i == 3:
+                            player_name = "AC"
+
+                        elif i == 4:
+                            player_name = "Author"
+
+                        else:
+                            raise ValueError(f"Invalid player index: {i}")
                         with gr.Tab(
                             player_name, visible=(i < DEFAULT_NUM_PLAYERS)
                         ) as tab:
-                            if player_name != "AC":
+                            if "Reviewer" in player_name:
                                 player_comps = get_player_components(
                                     player_name, visible=(i < DEFAULT_NUM_PLAYERS)
                                 )
-                            else:
+                            elif player_name == "AC":
                                 player_comps = get_area_chair_components(
+                                    player_name, visible=(i < DEFAULT_NUM_PLAYERS)
+                                )
+                            elif player_name == "Author":
+                                player_comps = get_author_components(
                                     player_name, visible=(i < DEFAULT_NUM_PLAYERS)
                                 )
 
@@ -362,13 +426,12 @@ Using Multi-Agent to review your paper!.
         # Step 1: Initialize the players
         num_players = MAX_NUM_PLAYERS
         
-        # 为了适应之前的接口填充无意义数据
-        conference = "EMNLP 2024"
+        # You can ignore these fields for the demo
+        conference = "EMNLP2024"
         paper_decision = "Accept"
         data_dir = ''
         paper_id = "12345"
-        
-        # Notion: 此处设置参数，experiment_name为无效填充参数
+
         args = Namespace(openai_client_type="azure_openai",
                          experiment_name="test",
                          max_num_words=16384)
@@ -402,7 +465,10 @@ Using Multi-Agent to review your paper!.
         
         
         for i in range(num_players):
-            if i < num_players-1: # reviewer 
+
+            role_name = role_desc = backend_type = temperature = max_tokens = None
+
+            if i in [0, 1, 2]: # reviewer
                 role_name, intention_config, knowledge_config, responsibility_config, backend_type, temperature, max_tokens = (
                     all_comps[c]
                     for c in players_idx2comp[i]
@@ -420,7 +486,7 @@ Using Multi-Agent to review your paper!.
                     
                 role_desc = get_reviewer_description(is_benign, is_knowledgeable, is_responsible)
             
-            if i == num_players-1: # AC
+            elif i == 3: # AC
                 role_name, ac_type, backend_type, temperature, max_tokens = (
                     all_comps[c]
                     for c in players_idx2comp[i]
@@ -432,7 +498,21 @@ Using Multi-Agent to review your paper!.
                 experiment_setting["players"]['AC'].append({"area_chair_type": ac_type})
                 
                 role_desc = get_ac_description(ac_type, "ac_write_metareviews", "None", 1)
-            
+
+            elif i == 4: # Author
+                role_name, backend_type, temperature, max_tokens = (
+                    all_comps[c]
+                    for c in players_idx2comp[i]
+                    if not isinstance(c, (gr.Accordion, gr.Tab))
+                )
+
+                role_desc = get_author_description()
+
+            else:
+                raise ValueError(f"Invalid player index: {i}")
+
+
+
             # common config for all players
             player_config = {
                 "name": role_name,
@@ -461,10 +541,10 @@ Using Multi-Agent to review your paper!.
         # 人为加入paper extractor
         paper_extractor_config = get_paper_extractor_config(max_tokens=2048)
 
-        paper_extractor = PaperExtractorPlayer( paper_pdf_path=paper_pdf_path,
-                                                data_dir=data_dir, paper_id=paper_id,
-                                                paper_decision=paper_decision, args=args,
-                                                conference=conference, **paper_extractor_config)
+        paper_extractor = PaperExtractorPlayer(paper_pdf_path=paper_pdf_path,
+                                            data_dir=data_dir, paper_id=paper_id,
+                                            paper_decision=paper_decision, args=args,
+                                            conference=conference, **paper_extractor_config)
         players.append(paper_extractor)
         
         # 人为加入author
@@ -515,6 +595,8 @@ Using Multi-Agent to review your paper!.
             all_messages = timestep.observation
             all_messages[0].content = 'Paper content has been extracted.'
             chatbot_output = _convert_to_chatbot_output(all_messages, display_recv=True)
+
+            # Initialize update dictionary
             update_dict = {
                 chatbot: chatbot_output,
                 btn_step: gr.update(
@@ -523,10 +605,37 @@ Using Multi-Agent to review your paper!.
                 btn_restart: gr.update(interactive=True),
                 state: cur_state,
             }
-            
-            # Reviewer 1, 2, 3 Area Chair, Paper Extractor, Author
-            
-            for i, player in enumerate(arena.players):
+
+            # Define a mapping of player names to their respective chatbots
+            player_name_to_chatbot = {
+                "Reviewer 1": player_chatbots[0],
+                "Reviewer 2": player_chatbots[1],
+                "Reviewer 3": player_chatbots[2],
+                "AC": player_chatbots[3],
+                "Author": player_chatbots[4],
+            }
+
+            # Update each player's chatbot output
+            for player in arena.players:
+                player_name = player.name
+                if player_name in player_name_to_chatbot:
+                    player_messages = arena.environment.get_messages_from_player(player_name)
+                    # player_messages[0].content = 'Paper content has been extracted.'
+                    player_output = _convert_to_chatbot_output(player_messages)
+                    update_dict[player_name_to_chatbot[player_name]] = player_output
+
+            # # Reviewer 1, 2, 3 Area Chair, Paper Extractor, Author
+            # for i, player in enumerate(arena.players):
+            #     player_name = player.name
+            #     # Get the messages for the current player
+            #     player_messages = arena.environment.get_observation(player_name)
+            #     player_messages[0].content = 'Paper content has been extracted.'
+            #
+            #     # Convert messages to chatbot output
+            #     player_output = _convert_to_chatbot_output(player_messages)
+
+
+                """
                 if 'Reviewer' in player.name and arena.environment.phase_index < 4: # FIXME: 临时逻辑
                     player_messages = arena.environment.get_observation(player.name)
                     # 不要显示第一条长段的信息，只显示 文章内容已被抽取
@@ -540,7 +649,11 @@ Using Multi-Agent to review your paper!.
                     player_output = _convert_to_chatbot_output(player_messages)
                     # Update the player's chatbot output
                     update_dict[player_chatbots[3]] = player_output
-            
+                """
+            # Ahren: Auto run
+            # if not timestep.terminal:
+            #     yield from step_game(all_comps)
+
             yield update_dict
         
             
@@ -594,7 +707,7 @@ Using Multi-Agent to review your paper!.
         ):
             comp.change(_disable_step_button, state, btn_step)
 
-    # print(set(all_components + [state]))
+    # Ahren: Auto run
     btn_step.click(
         step_game,
         set(all_components + [state]),
