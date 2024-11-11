@@ -30,7 +30,7 @@ SCORE_CALCULATION_v1 = {
     1: "This study is not yet sufficiently thorough to warrant publication or is not relevant to the conference. This paper makes marginal contributions"
 }
 
-# Start to use this rubric from 2024.1.23 as SCORE_CALCULATION_v1 is too harsh
+# Start to use this rubric as SCORE_CALCULATION_v1 is too harsh
 SCORE_CALCULATION = {
     10: "This study is among the top 2% of all papers. It is one of the most thorough I have seen. It changed my "
         "thinking on this topic. I would fight for it to be accepted",
@@ -97,12 +97,14 @@ def get_reviewer_description(is_benign: bool = None, is_knowledgeable: bool = No
     bio = ("You are a reviewer. You write peer review of academic papers by evaluating their technical "
            f"quality, originality, and clarity. ")
 
+    """
     # The reviewer's famous identities are known to the AC
     if knows_authors:
         bio += "\n\n" + INSTRUCTIONS_FOR_FAMOUS_AUTHORS
 
     else:
         bio += f"{SCORE_CONTROL}\n\n"
+    """
 
     bio += "## Review Guidelines\n"
 

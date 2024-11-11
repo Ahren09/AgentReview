@@ -116,11 +116,11 @@ def get_player_components(name, visible):
             with gr.Row():
                 # Converting the three attributes into dropdowns
                 Intention_config = gr.Dropdown(
-                    choices=["Benign", "Malicious", "Neutral"],
+                    choices=["Benign", "Malicious", "Normal"],
                     interactive=True,
                     label = "Intention",
                     show_label=True,
-                    value="Neutral",
+                    value="Normal",
                 )
                 
                 Knowledge_config = gr.Dropdown(
@@ -425,7 +425,7 @@ Simulate conference reviews on your own papers using LLM agents.
                 
                 upload_file_box = gr.File(
                     visible=True,
-                    height = 100,
+                    height=100,
                 )
                 
                 with gr.Row():
@@ -640,7 +640,7 @@ Simulate conference reviews on your own papers using LLM agents.
         # 更新前端信息
         if timestep:
             all_messages = timestep.observation
-            all_messages[0].content = 'Paper content has been extracted.'
+
             chatbot_output = _convert_to_chatbot_output(all_messages, display_recv=True)
 
             # Initialize update dictionary
@@ -769,4 +769,4 @@ Simulate conference reviews on your own papers using LLM agents.
 
     
 demo.queue()
-demo.launch() 
+demo.launch()
