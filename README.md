@@ -13,10 +13,9 @@ short_description: EMNLP 2024
 
 # AgentReview
 
-Official implementation for the 🔗[EMNLP 2024](https://2024.emnlp.org/) main track (Oral) paper -- [AgentReview: Exploring Peer Review Dynamics with LLM Agents](https://arxiv.org/abs/2406.12708)
+Official implementation for the 🔗[EMNLP 2024](https://2024.emnlp.org/) main track (Oral) paper -- **[AgentReview: Exploring Peer Review Dynamics with LLM Agents](https://arxiv.org/abs/2406.12708)**
 
-* 🌐 Website: [https://agentreview.github.io/](https://agentreview.github.io/)
-* 📄 Paper: [https://arxiv.org/abs/2406.12708](https://arxiv.org/abs/2406.12708)
+[💡Demo](https://huggingface.co/spaces/Ahren09/AgentReview) ｜ [🌐 Website](https://agentreview.github.io/) | [📄 Paper](https://aclanthology.org/2024.emnlp-main.70/) | [🔗arXiv](https://arxiv.org/abs/2406.12708) ｜ [💻Code](https://github.com/Ahren09/AgentReview)
 
 
 
@@ -61,8 +60,7 @@ Unzip [AgentReview_Paper_Data.zip](https://www.dropbox.com/scl/fi/l17brtbzsy3xwf
    unzip AgentReview_Paper_Data.zip -d data/
    ```
 
-(Optional) Unzip [AgentReview_LLM_Reviews.zip](https://www.dropbox.com/scl/fi/ckr0hpxyedx8u9s6235y6/AgentReview_LLM_Reviews.zip?rlkey=cgexir5xu38tm79eiph8ulbkq&st=q23x2trr&dl=0) under `outputs/`, which contains:
-   1. The LLM-generated reviews, (our LLM-generated dataset)
+(Optional) Unzip [AgentReview_LLM_Reviews.zip](https://www.dropbox.com/scl/fi/ckr0hpxyedx8u9s6235y6/AgentReview_LLM_Reviews.zip?rlkey=cgexir5xu38tm79eiph8ulbkq&st=q23x2trr&dl=0) under `outputs/`, which contains the LLM-generated reviews, (our LLM-generated dataset)
     
    ```bash
    unzip AgentReview_LLM_Review.zip -d outputs/

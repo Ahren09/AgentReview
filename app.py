@@ -284,9 +284,13 @@ with (gr.Blocks(css=css) as demo):
 
     with gr.Column(elem_id="col-container"):
         gr.Markdown(
-            """# 🤖[AgentReview](https://arxiv.org/abs/2406.12708)<br>
-S Multi-Agent to Simulate conference reviews on your own papers.
-**[Project Homepage](https://github.com/Ahren09/AgentReview)**""",
+            """
+# [AgentReview](https://arxiv.org/abs/2406.12708) 🎓
+Simulate conference reviews on your own papers using LLM agents.
+
+**[🌐Homepage](https://github.com/Ahren09/AgentReview)** | **[💻Code](https://github.com/Ahren09/AgentReview)** | **[
+📄Paper](https://aclanthology.org/2024.emnlp-main.70/)** | **[🔗arXiv](https://arxiv.org/abs/2406.12708)**
+""",
             elem_id="header",
         )
         
