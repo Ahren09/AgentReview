@@ -1,5 +1,7 @@
 import json
 import re
+import os
+from datetime import datetime
 from glob import glob
 from argparse import Namespace
 
@@ -41,6 +43,39 @@ DEFAULT_BACKEND = "openai-chat"
 MAX_NUM_PLAYERS = 5
 DEFAULT_NUM_PLAYERS = 5
 CURRENT_STEP_INDEX = 0
+
+
+
+USAGE_FILE = "usage_counter.json"
+MAX_DAILY_USES = 500
+
+# Initialize or load usage data
+if not os.path.exists(USAGE_FILE):
+    usage_data = {"count": 0, "date": str(datetime.now().date())}
+    with open(USAGE_FILE, "w") as f:
+        json.dump(usage_data, f)
+else:
+    with open(USAGE_FILE, "r") as f:
+        usage_data = json.load(f)
+
+# Function to update usage count
+def update_usage_count():
+    today = str(datetime.now().date())
+    print(f"Usage Count: {usage_data['count']}")
+    if usage_data["date"] != today:
+        # Reset the counter for a new day
+        usage_data["date"] = today
+        usage_data["count"] = 0
+
+    if usage_data["count"] >= MAX_DAILY_USES:
+        return False  # Limit reached
+
+    # Increment the counter
+    usage_data["count"] += 1
+    with open(USAGE_FILE, "w") as f:
+        json.dump(usage_data, f)
+
+    return True
 
 def load_examples():
     example_configs = {}
@@ -572,6 +607,14 @@ Simulate conference reviews on your own papers using LLM agents.
         
     def step_game(all_comps: dict):
         global CURRENT_STEP_INDEX
+
+        # Check usage limit
+        if not update_usage_count():
+            yield {
+                btn_step: gr.update(value="Usage Limit Reached", interactive=False),
+                btn_restart: gr.update(interactive=True),
+            }
+            return
         
         yield {
             btn_step: gr.update(value="Running...", interactive=False),
