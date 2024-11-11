@@ -57,7 +57,7 @@ class PaperReview(Conversation):
 
         if self._phases is not None:
             return self._phases
-
+        
         reviewer_names = [name for name in self.player_names if name.startswith("Reviewer")]
 
         num_reviewers = len(reviewer_names)
@@ -180,12 +180,9 @@ class PaperReview(Conversation):
                            "Phase V. (AC makes decisions).")
 
             else:
-                logger.info(f"Phase {self.phase_index}: end of the speaking order. Move to Phase ({self.phase_index + 1}).")
+                print(f"Phase {self.phase_index}: end of the speaking order. Move to Phase ({self.phase_index + 1}).")
                 self.phase_index += 1
                 self._current_turn += 1
-
-
-
 
         else:
             self._next_player_index += 1
@@ -200,7 +197,7 @@ class PaperReview(Conversation):
 
     def get_next_player(self) -> str:
         """Get the next player in the current phase."""
-        speaking_order = self.phases[self.phase_index]["speaking_order"]
+        speaking_order = self.phases[self.phase_index]["speaking_order"]   
         next_player = speaking_order[self._next_player_index]
         return next_player
 
@@ -214,3 +211,7 @@ class PaperReview(Conversation):
                 player_name, phase_index=self.phase_index, next_player_idx=self._next_player_index,
                 player_names=self.player_names
             )
+
+    def get_messages_from_player(self, player_name: str) -> List[str]:
+        """Get the list of actions that the player can take."""
+        return self.message_pool.get_messages_from_player(player_name)

@@ -60,7 +60,7 @@ class PaperReviewMessagePool(MessagePool):
                 visible_messages = []
 
         elif phase_index == 4:
-            if agent_name.startswith("AC"):
+            if agent_name.startswith("AC"):             
                 area_chair_type = self.experiment_setting['players']['AC'][0]["area_chair_type"]
 
                 # 'BASELINE' means we do not specify the area chair's characteristics in the config file
@@ -85,7 +85,6 @@ class PaperReviewMessagePool(MessagePool):
 
                 else:
                     raise ValueError(f"Unknown Area chair type: {area_chair_type}.")
-
 
         else:
 

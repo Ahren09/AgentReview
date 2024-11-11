@@ -78,6 +78,7 @@ class PaperExtractorPlayer(Player):
             paper_decision: str,
             conference: str,
             backend: Union[BackendConfig, IntelligenceBackend],
+            paper_pdf_path: str = None,
             global_prompt: str = None,
             **kwargs,
     ):
@@ -85,6 +86,9 @@ class PaperExtractorPlayer(Player):
         self.paper_id = paper_id
         self.paper_decision = paper_decision
         self.conference: str = conference
+        
+        if paper_pdf_path is not None:
+            self.paper_pdf_path = paper_pdf_path
 
     def act(self, observation: List[Message]) -> str:
         """
@@ -96,12 +100,17 @@ class PaperExtractorPlayer(Player):
         Returns:
             str: The action (response) of the player.
         """
-
-        logging.info(f"Loading {self.conference} paper {self.paper_id} ({self.paper_decision}) ...")
+        if self.paper_pdf_path is not None:
+            logging.info(f"Loading paper from {self.paper_pdf_path} ...")
+        else:
+            logging.info(f"Loading {self.conference} paper {self.paper_id} ({self.paper_decision}) ...")
 
         loader = PDFReader()
-        document_path = Path(os.path.join(self.args.data_dir, self.conference, "paper", self.paper_decision,
-                                          f"{self.paper_id}.pdf"))  #
+        if self.paper_pdf_path is not None:
+            document_path = Path(self.paper_pdf_path)
+        else:
+            document_path = Path(os.path.join(self.args.data_dir, self.conference, "paper", self.paper_decision,
+                                            f"{self.paper_id}.pdf"))  #
         documents = loader.load_data(file=document_path)
 
         num_words = 0
@@ -118,5 +127,7 @@ class PaperExtractorPlayer(Player):
             main_contents += text + ' '
             if FLAG:
                 break
-
+        
+        print(main_contents)
+        
         return main_contents
